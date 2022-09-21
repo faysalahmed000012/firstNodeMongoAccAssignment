@@ -46,10 +46,31 @@ app.post("/user/save", (req, res) => {
 });
 
 app.patch("/user/update", (req, res) => {
+  const info = req.body;
   const id = req.body._id;
   const users = JSON.parse(fs.readFileSync("users.data.json"));
   const user = users.find((user) => user._id == id);
+
+  user._id = id;
+  info.picture && (user.picture = info.picture);
+  info.name && (user.name = info.name);
+  info.gender && (user.gender = info.gender);
+  info.phone && (user.phone = info.phone);
+  info.address((user.address = info.address));
+
   res.send(user);
+});
+
+app.delete("/user/delete", (req, res) => {
+  const id = req?.body._id;
+  const users = JSON.parse(fs.readFileSync("users.data.json"));
+  const otherUsers = users.filter((user) => user._id != id);
+  const finalList = JSON.stringify(otherUsers, null, 2);
+  fs.writeFileSync("users.data.json", finalList, (err) => {
+    if (err) throw err;
+    console.log("Sorry, there is a problem. Please try again later");
+  });
+  res.send("Successfully Deleted the user");
 });
 
 app.listen(port, () => {
