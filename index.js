@@ -45,6 +45,13 @@ app.post("/user/save", (req, res) => {
   console.log(newUser);
 });
 
+app.patch("/user/update", (req, res) => {
+  const id = req.body._id;
+  const users = JSON.parse(fs.readFileSync("users.data.json"));
+  const user = users.find((user) => user._id == id);
+  res.send(user);
+});
+
 app.listen(port, () => {
   console.log(`Server is running at ${port}`);
 });
