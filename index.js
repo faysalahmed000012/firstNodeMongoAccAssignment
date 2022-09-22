@@ -2,7 +2,6 @@ const express = require("express");
 const port = process.env.PORT || 5000;
 const cors = require("cors");
 const fs = require("fs");
-// const { json } = require("express");
 
 const app = express();
 app.use(cors());
@@ -56,13 +55,40 @@ app.patch("/user/update", (req, res) => {
   info.name && (user.name = info.name);
   info.gender && (user.gender = info.gender);
   info.phone && (user.phone = info.phone);
-  info.address((user.address = info.address));
+  info.address && (user.address = info.address);
+  const updatedList = JSON.stringify(users, null, 2);
 
-  res.send(user);
+  fs.writeFile("users.data.json", updatedList, (err) => {
+    if (err) throw err;
+    console.log("something went wrong");
+  });
+  res.send(users);
+});
+
+app.patch("/user/bulk-update", (req, res) => {
+  const body = req.body;
+  const allUsers = JSON.parse(fs.readFileSync("users.data.json"));
+
+  const listed = body.map((targeted) => {
+    const user = allUsers.find((person) => person._id == targeted._id);
+    targeted.picture && (user.picture = targeted.picture);
+    targeted.name && (user.name = targeted.name);
+    targeted.gender && (user.gender = targeted.gender);
+    targeted.phone && (user.phone = targeted.phone);
+    targeted.address && (user.address = targeted.address);
+  });
+  const updatedList = JSON.stringify(allUsers, null, 2);
+
+  fs.writeFile("users.data.json", updatedList, (err) => {
+    if (err) throw err;
+    console.log("something went wrong");
+  });
+
+  res.send(allUsers);
 });
 
 app.delete("/user/delete", (req, res) => {
-  const id = req?.body._id;
+  const id = req.body._id;
   const users = JSON.parse(fs.readFileSync("users.data.json"));
   const otherUsers = users.filter((user) => user._id != id);
   const finalList = JSON.stringify(otherUsers, null, 2);
